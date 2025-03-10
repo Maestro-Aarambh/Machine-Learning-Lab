@@ -1,7 +1,7 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
-'''
+
 #a
 data=input("Enter Number seprated by space:")
 list=[int(n) for n in data.split(' ')]
@@ -32,7 +32,7 @@ else:
 #f
 df = pd.read_csv("https://raw.githubusercontent.com/mwaskom/seaborn-data/master/titanic.csv")
 print("\nFirst 5 rows of the dataset:\n",df.head())
-'''
+
 #g
 x=list(map(int,input("Enter x values seprated by space: ").split()))
 y=list(map(int,input("Enter y values seprated by space: ").split()))
