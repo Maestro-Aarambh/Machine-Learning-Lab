@@ -12,8 +12,6 @@ df = pd.read_csv(file_path)
 df.columns = df.columns.str.strip()
 df.columns = df.columns.str.replace('.', '', regex=False)
 
-print(df.columns)
-
 features = ['hp', 'attack', 'defense', 'sp_attack', 'sp_defense', 'speed']
 
 df_filtered = df[['name', 'type1', 'type2'] + features].dropna()
@@ -28,22 +26,19 @@ def apply_kmeans(k):
     kmeans = KMeans(n_clusters=k, random_state=42, n_init=10)
     df_filtered['Cluster'] = kmeans.fit_predict(df_filtered[features])
 
+    print(f"\nK-Means Clustering with k = {k}")
+    for cluster in range(k):
+        cluster_pokemon = df_filtered[df_filtered['Cluster'] == cluster]['name'].tolist()
+        print(f"Cluster {cluster}: {', '.join(cluster_pokemon[:10])}...")  # Shows first 10 Pokémon per cluster
+
     if k > 1:
         score = silhouette_score(df_filtered[features], df_filtered['Cluster']) * 100
         accuracy_scores.append(score)
-        print(f"Accuracy for k={k}: {score:.2f}%")
+        print(f"\nAccuracy for k={k}: {score:.2f}%")
     else:
         accuracy_scores.append(None)
-        print(f"Accuracy for k={k}: Not applicable")
-''''
-    plt.figure(figsize=(8, 6))
-    plt.scatter(df_filtered['attack'], df_filtered['defense'], c=df_filtered['Cluster'], cmap='viridis', alpha=0.6, edgecolors='k')
-    plt.xlabel("Attack")
-    plt.ylabel("Defense")
-    plt.title(f"K-Means Clustering with k = {k}")
-    plt.colorbar(label="Cluster")
-    plt.show()
-'''
+        print(f"\nAccuracy for k={k}: Not applicable")
+
 for k in k_values:
     apply_kmeans(k)
 
