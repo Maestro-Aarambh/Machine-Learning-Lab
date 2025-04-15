@@ -7,7 +7,6 @@ from io import BytesIO
 from sklearn.cluster import KMeans
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
-from sklearn.metrics import silhouette_score
 
 file_path = r"D:\Machine-Learning-Lab\pokemon.csv"
 df = pd.read_csv(file_path)
@@ -25,18 +24,7 @@ pca = PCA(n_components=2)
 pca_features = pca.fit_transform(df_filtered[features])
 df_filtered['PCA1'], df_filtered['PCA2'] = pca_features[:, 0], pca_features[:, 1]
 
-def find_optimal_clusters(data, max_clusters=10):
-    silhouette_scores = []
-    cluster_range = range(2, max_clusters + 1)
-    for k in cluster_range:
-        kmeans = KMeans(n_clusters=k, random_state=42, n_init=10)
-        labels = kmeans.fit_predict(data)
-        silhouette_scores.append(silhouette_score(data, labels))
-    return cluster_range[np.argmax(silhouette_scores)]
-
-optimal_k = find_optimal_clusters(df_filtered[['PCA1', 'PCA2']], max_clusters=10)
-
-kmeans = KMeans(n_clusters=optimal_k, random_state=42, n_init=10)
+kmeans = KMeans(n_clusters=6, random_state=None, n_init=10)
 df_filtered['Cluster'] = kmeans.fit_predict(df_filtered[['PCA1', 'PCA2']])
 
 type_chart = {
@@ -82,8 +70,10 @@ def get_pokemon_image(pokemon_name):
         url = f"https://pokeapi.co/api/v2/pokemon/{pokemon_name.lower()}"
         response = requests.get(url)
         if response.status_code == 200:
-            return response.json()['sprites']['front_default']
-        return None
+            data = response.json()
+            return data['sprites']['front_default']
+        else:
+            return None
     except:
         return None
 
@@ -94,17 +84,16 @@ def build_pokemon_team(pokemon_type):
         print(f"No Pokémon found with type: {pokemon_type.capitalize()}.")
         return None
     team = []
-    for cluster in range(optimal_k):
+    for cluster in range(6):
         poke_cluster = type_pokemon[type_pokemon['Cluster'] == cluster]
         if not poke_cluster.empty:
             team.append(poke_cluster.sample(1))  
-    remaining_pokemon = type_pokemon[~type_pokemon['name'].isin(pd.concat(team)['name'])]
-    while len(team) < 6 and not remaining_pokemon.empty:
-        team.append(remaining_pokemon.sample(1))
-        remaining_pokemon = remaining_pokemon[~remaining_pokemon['name'].isin(pd.concat(team)['name'])]
-    team_df = pd.concat(team).reset_index(drop=True).head(6)
-    team_df['Weaknesses'] = team_df.apply(lambda row: get_true_weaknesses(row['type1'], row['type2']), axis=1)
+    if not team:
+        print("No suitable Pokémon team found.")
+        return None
+    team_df = pd.concat(team).reset_index(drop=True)
     print("\nYour Pokémon Team:")
+    team_df['Weaknesses'] = team_df.apply(lambda row: get_true_weaknesses(row['type1'], row['type2']), axis=1)
     print(team_df[['name', 'type1', 'type2', 'Weaknesses']])
     fig, axes = plt.subplots(1, len(team_df), figsize=(15, 5))
     if len(team_df) == 1:
@@ -115,6 +104,8 @@ def build_pokemon_team(pokemon_type):
             response = requests.get(img_url)
             img = Image.open(BytesIO(response.content))
             axes[i].imshow(img)
+        else:
+            axes[i].imshow(np.zeros((64, 64, 3)))  
         axes[i].axis('off')
         axes[i].set_title(f"{pokemon}\nWeak: {team_df.loc[i, 'Weaknesses']}", fontsize=9, wrap=True)
     plt.tight_layout()
