@@ -23,11 +23,13 @@ for k in k_list:
     acc_list.append(acc)
     print(f"Accuracy with {k} kernel: {acc:.4f}")
 
+# Simple line plot
 plt.figure(figsize=(8, 5))
-plt.bar(k_list, acc_list, color=['skyblue', 'orange', 'green'])
+plt.plot(k_list, acc_list, marker='o', linestyle='-', color='b', label='Accuracy')
 plt.title("SVM Accuracy with Kernels")
 plt.xlabel("Kernel")
 plt.ylabel("Accuracy")
 plt.ylim(0, 1)
-plt.grid(True, axis='y')
+plt.grid(True)
+plt.legend()
 plt.show()
