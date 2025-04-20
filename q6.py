@@ -8,7 +8,7 @@ file = r"D:\Machine-Learning-Lab\Sensorless_drive_diagnosis.txt"
 df = pd.read_csv(file, sep=' ', header=None)
 
 X = df.iloc[:, :-1] 
-y = df.iloc[:, -1]  
+y = df.iloc[:, -1]
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
 
