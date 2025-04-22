@@ -4,8 +4,8 @@ import numpy as np
 
 #a
 data=input("Enter Number seprated by space:")
-list=[int(n) for n in data.split(' ')]
-series=pd.Series(list)
+list_a=[int(n) for n in data.split(' ')]
+series=pd.Series(list_a)
 print("\nPandas Series:\n",series)
 #b
 print("Index of series:",series.index)
